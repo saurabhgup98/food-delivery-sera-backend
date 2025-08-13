@@ -1,0 +1,2 @@
+This file forces a redeploy to apply CORS changes
+Timestamp: 2024-01-01

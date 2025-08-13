@@ -37,8 +37,9 @@ app.use(helmet({
 }));
 
 // CORS configuration
+// CORS configuration
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://food-delivery-sera.vercel.app'],
+  origin: true, // Allow all origins temporarily
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
