@@ -10,13 +10,24 @@ export default function handler(req, res) {
     return;
   }
   
-  res.status(200).json({
-    message: 'Food Delivery Backend API',
-    status: 'running',
-    timestamp: new Date().toISOString(),
-    endpoints: {
-      test: '/api/test',
-      health: '/api/health'
-    }
-  });
+  // Check if this is a root request or API request
+  const isRootRequest = req.url === '/' || req.url === '/api' || req.url === '/api/';
+  
+  if (isRootRequest) {
+    res.status(200).json({
+      message: 'Food Delivery Backend API',
+      status: 'running',
+      timestamp: new Date().toISOString(),
+      endpoints: {
+        test: '/api/test',
+        health: '/api/health'
+      }
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      message: 'Endpoint not found',
+      availableEndpoints: ['/api/test', '/api/health']
+    });
+  }
 }
