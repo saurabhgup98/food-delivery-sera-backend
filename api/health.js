@@ -12,10 +12,9 @@ export default function handler(req, res) {
   
   res.status(200).json({
     success: true,
-    message: 'Backend API test endpoint is working!',
+    message: 'Backend is healthy!',
     timestamp: new Date().toISOString(),
-    method: req.method,
-    url: req.url,
-    path: req.url
+    status: 'OK',
+    environment: process.env.NODE_ENV || 'development'
   });
 }
