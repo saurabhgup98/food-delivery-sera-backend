@@ -1,13 +1,10 @@
 {
   "version": 2,
   "functions": {
-    "index.js": {
+    "api/index.js": {
       "maxDuration": 10
     },
     "api/test.js": {
-      "maxDuration": 10
-    },
-    "api/index.js": {
       "maxDuration": 10
     },
     "api/health.js": {
