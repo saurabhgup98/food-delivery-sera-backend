@@ -1,5 +1,6 @@
 // Simple test to check if deployment is working
-const express = require('express');
+import express from 'express';
+
 const app = express();
 
 app.get('/test', (req, res) => {
@@ -17,7 +18,5 @@ app.get('/', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Test server running on port ${PORT}`);
-});
+// For Vercel serverless functions, we need to export the app
+export default app;
