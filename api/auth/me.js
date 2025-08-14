@@ -28,8 +28,10 @@ export default async function handler(req, res) {
     
     // Get authorization header
     const authHeader = req.headers.authorization;
+    console.log('Auth header received:', authHeader ? 'Present' : 'Missing');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('Invalid auth header format');
       return res.status(401).json({
         success: false,
         message: 'No token provided'
@@ -37,11 +39,15 @@ export default async function handler(req, res) {
     }
     
     const token = authHeader.split(' ')[1];
+    console.log('Token extracted:', token ? 'Present' : 'Missing');
     
     // Verify JWT token
+    console.log('Verifying JWT token...');
     const decoded = verifyToken(token);
+    console.log('Token decoded successfully, userId:', decoded.userId);
     
     // Find user by ID
+    console.log('Finding user by ID:', decoded.userId);
     const user = await User.findById(decoded.userId);
     
     if (!user) {
