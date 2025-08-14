@@ -49,8 +49,7 @@ const userSchema = new mongoose.Schema({
   addresses: [{
     type: {
       type: String,
-      enum: ['home', 'work', 'other'],
-      default: 'home'
+      enum: ['home', 'work', 'other']
     },
     street: String,
     city: String,
@@ -66,21 +65,20 @@ const userSchema = new mongoose.Schema({
     favoriteCuisines: [String],
     spiceLevel: {
       type: String,
-      enum: ['mild', 'medium', 'hot'],
-      default: 'medium'
+      enum: ['mild', 'medium', 'hot']
     }
   },
   settings: {
     notifications: {
-      email: { type: Boolean, default: true },
-      push: { type: Boolean, default: true },
-      sms: { type: Boolean, default: false }
+      email: { type: Boolean },
+      push: { type: Boolean },
+      sms: { type: Boolean }
     },
     preferences: {
-      dietary: { type: String, enum: ['none', 'veg', 'non-veg', 'jain', 'vegan'], default: 'none' },
-      spiceLevel: { type: String, enum: ['mild', 'medium', 'hot'], default: 'medium' },
-      language: { type: String, default: 'en' },
-      currency: { type: String, default: 'INR' }
+      dietary: { type: String, enum: ['none', 'veg', 'non-veg', 'jain', 'vegan'] },
+      spiceLevel: { type: String, enum: ['mild', 'medium', 'hot'] },
+      language: { type: String },
+      currency: { type: String }
     }
   },
   isActive: {
