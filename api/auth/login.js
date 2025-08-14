@@ -1,4 +1,8 @@
-export default function handler(req, res) {
+import connectDB from '../../lib/mongodb.js';
+import User from '../../models/User.js';
+import { generateToken } from '../../lib/jwt.js';
+
+export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', 'https://food-delivery-sera.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -19,6 +23,9 @@ export default function handler(req, res) {
   }
   
   try {
+    // Connect to database
+    await connectDB();
+    
     const { email, password } = req.body;
     
     // Basic validation
@@ -29,25 +36,49 @@ export default function handler(req, res) {
       });
     }
     
-    // For now, simulate successful login for any valid email/password
-    // In a real app, you would verify against database
-    const mockUser = {
-      _id: 'user_' + Date.now(),
-      name: email.split('@')[0], // Use email prefix as name
-      email,
-      role: 'user',
-      phone: '',
-      avatar: ''
-    };
+    // Find user by email and include password for comparison
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
     
-    const mockToken = 'mock_jwt_token_' + Date.now();
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+    
+    // Check if user is active
+    if (!user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is deactivated'
+      });
+    }
+    
+    // Verify password
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+    
+    // Generate JWT token
+    const token = generateToken(user._id);
     
     res.status(200).json({
       success: true,
       message: 'Login successful',
       data: {
-        user: mockUser,
-        token: mockToken
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          avatar: user.avatar
+        },
+        token
       }
     });
     

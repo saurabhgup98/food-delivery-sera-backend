@@ -1,4 +1,8 @@
-export default function handler(req, res) {
+import connectDB from '../../lib/mongodb.js';
+import User from '../../models/User.js';
+import { verifyToken } from '../../lib/jwt.js';
+
+export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', 'https://food-delivery-sera.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -19,6 +23,9 @@ export default function handler(req, res) {
   }
   
   try {
+    // Connect to database
+    await connectDB();
+    
     // Get authorization header
     const authHeader = req.headers.authorization;
     
@@ -31,35 +38,53 @@ export default function handler(req, res) {
     
     const token = authHeader.split(' ')[1];
     
-    // For now, simulate token validation
-    // In a real app, you would verify the JWT token
-    if (!token || !token.startsWith('mock_jwt_token_')) {
+    // Verify JWT token
+    const decoded = verifyToken(token);
+    
+    // Find user by ID
+    const user = await User.findById(decoded.userId);
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    if (!user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is deactivated'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'User data retrieved successfully',
+      data: {
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          avatar: user.avatar,
+          addresses: user.addresses,
+          preferences: user.preferences
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('Get user error:', error);
+    
+    if (error.message === 'Invalid token') {
       return res.status(401).json({
         success: false,
         message: 'Invalid token'
       });
     }
     
-    // Mock user data
-    const mockUser = {
-      _id: 'user_123456789',
-      name: 'Test User',
-      email: 'test@example.com',
-      role: 'user',
-      phone: '',
-      avatar: ''
-    };
-    
-    res.status(200).json({
-      success: true,
-      message: 'User data retrieved successfully',
-      data: {
-        user: mockUser
-      }
-    });
-    
-  } catch (error) {
-    console.error('Get user error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error'

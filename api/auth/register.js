@@ -1,4 +1,8 @@
-export default function handler(req, res) {
+import connectDB from '../../lib/mongodb.js';
+import User from '../../models/User.js';
+import { generateToken } from '../../lib/jwt.js';
+
+export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', 'https://food-delivery-sera.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -19,6 +23,9 @@ export default function handler(req, res) {
   }
   
   try {
+    // Connect to database
+    await connectDB();
+    
     const { name, email, password } = req.body;
     
     // Basic validation
@@ -36,30 +43,54 @@ export default function handler(req, res) {
       });
     }
     
-    // For now, simulate successful registration
-    // In a real app, you would hash the password and save to database
-    const mockUser = {
-      _id: 'user_' + Date.now(),
-      name,
-      email,
-      role: 'user',
-      phone: '',
-      avatar: ''
-    };
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User with this email already exists'
+      });
+    }
     
-    const mockToken = 'mock_jwt_token_' + Date.now();
+    // Create new user
+    const user = new User({
+      name,
+      email: email.toLowerCase(),
+      password
+    });
+    
+    await user.save();
+    
+    // Generate JWT token
+    const token = generateToken(user._id);
     
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
       data: {
-        user: mockUser,
-        token: mockToken
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          avatar: user.avatar
+        },
+        token
       }
     });
     
   } catch (error) {
     console.error('Registration error:', error);
+    
+    // Handle duplicate email error
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'User with this email already exists'
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Internal server error'
