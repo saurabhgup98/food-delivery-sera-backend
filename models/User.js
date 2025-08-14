@@ -59,6 +59,19 @@ const userSchema = new mongoose.Schema({
       default: 'medium'
     }
   },
+  settings: {
+    notifications: {
+      email: { type: Boolean, default: true },
+      push: { type: Boolean, default: true },
+      sms: { type: Boolean, default: false }
+    },
+    preferences: {
+      dietary: { type: String, enum: ['none', 'veg', 'non-veg', 'jain', 'vegan'], default: 'none' },
+      spiceLevel: { type: String, enum: ['mild', 'medium', 'hot'], default: 'medium' },
+      language: { type: String, default: 'en' },
+      currency: { type: String, default: 'INR' }
+    }
+  },
   isActive: {
     type: Boolean,
     default: true
