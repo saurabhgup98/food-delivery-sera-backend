@@ -13,10 +13,10 @@ export default function handler(req, res) {
     status: 'running',
     timestamp: new Date().toISOString(),
     endpoints: {
-      root: '/api',
-      test: '/api/test',
-      health: '/api/health',
-      simple: '/api/simple'
+      root: '/',
+      test: '/test',
+      health: '/health',
+      simple: '/simple'
     }
   });
 }
