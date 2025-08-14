@@ -31,9 +31,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  dateOfBirth: {
+    type: Date
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'other', 'prefer-not-to-say']
+  },
   avatar: {
     type: String,
     default: ''
+  },
+  isProfileComplete: {
+    type: Boolean,
+    default: false
   },
   addresses: [{
     type: {
@@ -41,10 +52,10 @@ const userSchema = new mongoose.Schema({
       enum: ['home', 'work', 'other'],
       default: 'home'
     },
-    address: String,
+    street: String,
     city: String,
     state: String,
-    zipCode: String,
+    pincode: String,
     isDefault: {
       type: Boolean,
       default: false
