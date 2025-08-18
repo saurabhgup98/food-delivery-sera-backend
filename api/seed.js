@@ -267,10 +267,9 @@ const sampleRestaurants = [
   }
 ];
 
-const sampleMenuItems = [
-  // Chat Street - Bangalore (Street Food)
+// Menu items for different restaurant types
+const streetFoodItems = [
   {
-    restaurantId: null,
     name: 'Pani Puri',
     description: 'Crispy puris filled with tangy tamarind water and spicy potato mixture',
     price: '₹60',
@@ -423,7 +422,6 @@ const sampleMenuItems = [
     isTrending: false
   },
   {
-    restaurantId: null,
     name: 'Lassi',
     description: 'Sweet yogurt drink with cardamom and saffron',
     price: '₹60',
@@ -433,6 +431,658 @@ const sampleMenuItems = [
     spiceLevel: 'mild',
     prepTime: '3 min',
     calories: '120 cal',
+    rating: 4.2,
+    isPopular: false,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  }
+];
+
+const indianRestaurantItems = [
+  {
+    name: 'Butter Chicken',
+    description: 'Tender chicken in rich tomato and butter gravy',
+    price: '₹280',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'medium',
+    prepTime: '25 min',
+    calories: '450 cal',
+    rating: 4.8,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: false,
+    isTrending: true
+  },
+  {
+    name: 'Paneer Tikka',
+    description: 'Marinated cottage cheese grilled to perfection',
+    price: '₹220',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'starters',
+    dietary: 'veg',
+    spiceLevel: 'medium',
+    prepTime: '20 min',
+    calories: '280 cal',
+    rating: 4.6,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: true
+  },
+  {
+    name: 'Dal Makhani',
+    description: 'Creamy black lentils slow-cooked overnight',
+    price: '₹180',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '30 min',
+    calories: '320 cal',
+    rating: 4.4,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: false,
+    isTrending: false
+  },
+  {
+    name: 'Biryani',
+    description: 'Aromatic rice with tender meat and spices',
+    price: '₹350',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'medium',
+    prepTime: '35 min',
+    calories: '580 cal',
+    rating: 4.7,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: false,
+    isTrending: true
+  },
+  {
+    name: 'Naan Bread',
+    description: 'Soft leavened bread baked in tandoor',
+    price: '₹40',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'breads',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '8 min',
+    calories: '120 cal',
+    rating: 4.3,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Rogan Josh',
+    description: 'Tender lamb in aromatic Kashmiri spices',
+    price: '₹320',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'medium',
+    prepTime: '40 min',
+    calories: '520 cal',
+    rating: 4.5,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: false,
+    isTrending: false
+  },
+  {
+    name: 'Paneer Butter Masala',
+    description: 'Cottage cheese in rich tomato and cream gravy',
+    price: '₹240',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '25 min',
+    calories: '380 cal',
+    rating: 4.4,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Gulab Jamun',
+    description: 'Sweet milk dumplings in sugar syrup',
+    price: '₹80',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'desserts',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '5 min',
+    calories: '200 cal',
+    rating: 4.6,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Mango Lassi',
+    description: 'Sweet yogurt drink with fresh mango',
+    price: '₹70',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'beverages',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '3 min',
+    calories: '150 cal',
+    rating: 4.3,
+    isPopular: false,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Raita',
+    description: 'Cooling yogurt with cucumber and mint',
+    price: '₹50',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'starters',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '5 min',
+    calories: '80 cal',
+    rating: 4.2,
+    isPopular: false,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  }
+];
+
+const pizzaItems = [
+  {
+    name: 'Margherita Pizza',
+    description: 'Classic tomato sauce with mozzarella cheese',
+    price: '₹350',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '20 min',
+    calories: '420 cal',
+    rating: 4.5,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: true
+  },
+  {
+    name: 'Pepperoni Pizza',
+    description: 'Spicy pepperoni with melted cheese',
+    price: '₹450',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'medium',
+    prepTime: '22 min',
+    calories: '520 cal',
+    rating: 4.6,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: true
+  },
+  {
+    name: 'BBQ Chicken Pizza',
+    description: 'BBQ sauce with grilled chicken and onions',
+    price: '₹480',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'medium',
+    prepTime: '25 min',
+    calories: '580 cal',
+    rating: 4.7,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: false,
+    isTrending: true
+  },
+  {
+    name: 'Garlic Bread',
+    description: 'Crispy bread with garlic butter and herbs',
+    price: '₹120',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'starters',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '8 min',
+    calories: '180 cal',
+    rating: 4.3,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Quattro Stagioni',
+    description: 'Four seasons pizza with different toppings',
+    price: '₹520',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'medium',
+    prepTime: '28 min',
+    calories: '620 cal',
+    rating: 4.8,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: false,
+    isTrending: true
+  },
+  {
+    name: 'Diavola Pizza',
+    description: 'Spicy salami with hot peppers',
+    price: '₹480',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'hot',
+    prepTime: '25 min',
+    calories: '580 cal',
+    rating: 4.6,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Caprese Salad',
+    description: 'Fresh mozzarella with tomatoes and basil',
+    price: '₹180',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'starters',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '10 min',
+    calories: '120 cal',
+    rating: 4.4,
+    isPopular: false,
+    isChefSpecial: true,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Tiramisu',
+    description: 'Classic Italian coffee-flavored dessert',
+    price: '₹200',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'desserts',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '5 min',
+    calories: '280 cal',
+    rating: 4.7,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Italian Soda',
+    description: 'Refreshing soda with flavored syrup',
+    price: '₹80',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'beverages',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '3 min',
+    calories: '100 cal',
+    rating: 4.2,
+    isPopular: false,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Pasta Carbonara',
+    description: 'Creamy pasta with bacon and parmesan',
+    price: '₹320',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'mild',
+    prepTime: '18 min',
+    calories: '480 cal',
+    rating: 4.5,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  }
+];
+
+const chineseItems = [
+  {
+    name: 'Kung Pao Chicken',
+    description: 'Spicy diced chicken with peanuts and vegetables',
+    price: '₹280',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'hot',
+    prepTime: '25 min',
+    calories: '420 cal',
+    rating: 4.6,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: false,
+    isTrending: true
+  },
+  {
+    name: 'Sweet and Sour Fish',
+    description: 'Crispy fish in tangy sweet and sour sauce',
+    price: '₹320',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'mild',
+    prepTime: '30 min',
+    calories: '380 cal',
+    rating: 4.4,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: false,
+    isTrending: false
+  },
+  {
+    name: 'Dim Sum',
+    description: 'Steamed dumplings with various fillings',
+    price: '₹180',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'starters',
+    dietary: 'non-veg',
+    spiceLevel: 'mild',
+    prepTime: '15 min',
+    calories: '220 cal',
+    rating: 4.5,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: true
+  },
+  {
+    name: 'Spring Rolls',
+    description: 'Crispy vegetable rolls with sweet chili sauce',
+    price: '₹120',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'starters',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '12 min',
+    calories: '160 cal',
+    rating: 4.3,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'General Tso\'s Chicken',
+    description: 'Crispy chicken in sweet and spicy sauce',
+    price: '₹300',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'medium',
+    prepTime: '28 min',
+    calories: '480 cal',
+    rating: 4.7,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: false,
+    isTrending: true
+  },
+  {
+    name: 'Honey Garlic Fish',
+    description: 'Fish fillet in honey garlic glaze',
+    price: '₹340',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'mild',
+    prepTime: '32 min',
+    calories: '420 cal',
+    rating: 4.5,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: false,
+    isTrending: false
+  },
+  {
+    name: 'Dim Sum Platter',
+    description: 'Assorted steamed and fried dumplings',
+    price: '₹220',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'starters',
+    dietary: 'non-veg',
+    spiceLevel: 'mild',
+    prepTime: '20 min',
+    calories: '280 cal',
+    rating: 4.6,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: false,
+    isTrending: true
+  },
+  {
+    name: 'Fortune Cookie',
+    description: 'Crispy cookie with fortune message',
+    price: '₹40',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'desserts',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '2 min',
+    calories: '80 cal',
+    rating: 4.2,
+    isPopular: false,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Green Tea',
+    description: 'Traditional Chinese green tea',
+    price: '₹60',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'beverages',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '3 min',
+    calories: '20 cal',
+    rating: 4.1,
+    isPopular: false,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Wonton Soup',
+    description: 'Clear soup with dumplings and vegetables',
+    price: '₹140',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'starters',
+    dietary: 'non-veg',
+    spiceLevel: 'mild',
+    prepTime: '15 min',
+    calories: '180 cal',
+    rating: 4.3,
+    isPopular: false,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  }
+];
+
+const multiCuisineItems = [
+  {
+    name: 'Indo-Chinese Noodles',
+    description: 'Spicy noodles with Indian and Chinese flavors',
+    price: '₹180',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'veg',
+    spiceLevel: 'medium',
+    prepTime: '20 min',
+    calories: '320 cal',
+    rating: 4.4,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: true
+  },
+  {
+    name: 'Mexican Tacos',
+    description: 'Soft tortillas with spiced meat and vegetables',
+    price: '₹220',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'medium',
+    prepTime: '18 min',
+    calories: '380 cal',
+    rating: 4.5,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: true,
+    isTrending: true
+  },
+  {
+    name: 'Thai Green Curry',
+    description: 'Coconut curry with vegetables and herbs',
+    price: '₹260',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'veg',
+    spiceLevel: 'medium',
+    prepTime: '25 min',
+    calories: '340 cal',
+    rating: 4.6,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: false,
+    isTrending: true
+  },
+  {
+    name: 'American Burger',
+    description: 'Juicy beef patty with cheese and vegetables',
+    price: '₹280',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'mild',
+    prepTime: '15 min',
+    calories: '520 cal',
+    rating: 4.7,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: true
+  },
+  {
+    name: 'Mexican Enchiladas',
+    description: 'Corn tortillas filled with cheese and sauce',
+    price: '₹240',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'veg',
+    spiceLevel: 'medium',
+    prepTime: '22 min',
+    calories: '420 cal',
+    rating: 4.4,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: false,
+    isTrending: false
+  },
+  {
+    name: 'American BBQ Ribs',
+    description: 'Slow-cooked ribs with BBQ sauce',
+    price: '₹380',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'medium',
+    prepTime: '45 min',
+    calories: '680 cal',
+    rating: 4.8,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: false,
+    isTrending: true
+  },
+  {
+    name: 'Japanese Ramen',
+    description: 'Noodles in rich broth with toppings',
+    price: '₹300',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'mains',
+    dietary: 'non-veg',
+    spiceLevel: 'mild',
+    prepTime: '20 min',
+    calories: '480 cal',
+    rating: 4.6,
+    isPopular: true,
+    isChefSpecial: true,
+    isQuickOrder: false,
+    isTrending: true
+  },
+  {
+    name: 'Chocolate Brownie',
+    description: 'Warm chocolate brownie with ice cream',
+    price: '₹160',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'desserts',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '5 min',
+    calories: '320 cal',
+    rating: 4.7,
+    isPopular: true,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Iced Coffee',
+    description: 'Cold coffee with cream and sugar',
+    price: '₹120',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'beverages',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '3 min',
+    calories: '180 cal',
+    rating: 4.3,
+    isPopular: false,
+    isChefSpecial: false,
+    isQuickOrder: true,
+    isTrending: false
+  },
+  {
+    name: 'Nachos',
+    description: 'Crispy chips with cheese and salsa',
+    price: '₹140',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    category: 'starters',
+    dietary: 'veg',
+    spiceLevel: 'mild',
+    prepTime: '8 min',
+    calories: '240 cal',
     rating: 4.2,
     isPopular: false,
     isChefSpecial: false,
@@ -456,12 +1106,30 @@ async function seedDatabase() {
     console.log('Creating menu items...');
     const allMenuItems = [];
     
-    // Create menu items for each restaurant (reusing the same items for simplicity)
-    for (let restaurantIndex = 0; restaurantIndex < createdRestaurants.length; restaurantIndex++) {
-      for (let itemIndex = 0; itemIndex < sampleMenuItems.length; itemIndex++) {
+    // Assign appropriate menu items to each restaurant based on cuisine
+    for (let i = 0; i < createdRestaurants.length; i++) {
+      const restaurant = createdRestaurants[i];
+      let menuItemsToAssign;
+      
+      // Determine which menu items to assign based on restaurant cuisine
+      if (restaurant.cuisine.includes('Street Food') || restaurant.cuisine.includes('Chats')) {
+        menuItemsToAssign = streetFoodItems;
+      } else if (restaurant.cuisine.includes('Indian') || restaurant.cuisine.includes('Mughlai')) {
+        menuItemsToAssign = indianRestaurantItems;
+      } else if (restaurant.cuisine.includes('Italian') || restaurant.cuisine.includes('Pizza')) {
+        menuItemsToAssign = pizzaItems;
+      } else if (restaurant.cuisine.includes('Chinese') || restaurant.cuisine.includes('Asian')) {
+        menuItemsToAssign = chineseItems;
+      } else {
+        // Multi-cuisine restaurants
+        menuItemsToAssign = multiCuisineItems;
+      }
+      
+      // Assign menu items to this restaurant
+      for (let j = 0; j < menuItemsToAssign.length; j++) {
         allMenuItems.push({
-          ...sampleMenuItems[itemIndex],
-          restaurantId: createdRestaurants[restaurantIndex]._id
+          ...menuItemsToAssign[j],
+          restaurantId: restaurant._id
         });
       }
     }
