@@ -297,9 +297,9 @@ const streetFoodItems = [
     calories: '180 cal',
     rating: 4.3,
     isPopular: true,
-    isChefSpecial: false,
+    isChefSpecial: true,
     isQuickOrder: true,
-    isTrending: false
+    isTrending: true
   },
   {
     name: 'Dahi Puri',
@@ -315,7 +315,7 @@ const streetFoodItems = [
     isPopular: true,
     isChefSpecial: false,
     isQuickOrder: true,
-    isTrending: false
+    isTrending: true
   },
   {
     name: 'Samosa Chaat',
@@ -330,7 +330,7 @@ const streetFoodItems = [
     rating: 4.6,
     isPopular: true,
     isChefSpecial: true,
-    isQuickOrder: false,
+    isQuickOrder: true,
     isTrending: true
   },
   {
@@ -460,7 +460,7 @@ const indianRestaurantItems = [
     calories: '280 cal',
     rating: 4.6,
     isPopular: true,
-    isChefSpecial: false,
+    isChefSpecial: true,
     isQuickOrder: true,
     isTrending: true
   },
@@ -477,8 +477,8 @@ const indianRestaurantItems = [
     rating: 4.4,
     isPopular: true,
     isChefSpecial: false,
-    isQuickOrder: false,
-    isTrending: false
+    isQuickOrder: true,
+    isTrending: true
   },
   {
     name: 'Biryani',
