@@ -286,7 +286,6 @@ const streetFoodItems = [
     isTrending: true
   },
   {
-    restaurantId: null,
     name: 'Bhel Puri',
     description: 'Puffed rice mixed with chutneys, vegetables, and crunchy sev',
     price: '₹80',
@@ -303,7 +302,6 @@ const streetFoodItems = [
     isTrending: false
   },
   {
-    restaurantId: null,
     name: 'Dahi Puri',
     description: 'Puris filled with yogurt, chutneys, and sweet tamarind sauce',
     price: '₹90',
@@ -320,7 +318,6 @@ const streetFoodItems = [
     isTrending: false
   },
   {
-    restaurantId: null,
     name: 'Samosa Chaat',
     description: 'Crushed samosa topped with yogurt, chutneys, and spices',
     price: '₹100',
@@ -337,7 +334,6 @@ const streetFoodItems = [
     isTrending: true
   },
   {
-    restaurantId: null,
     name: 'Pav Bhaji',
     description: 'Spiced vegetable curry served with soft bread rolls',
     price: '₹120',
@@ -354,7 +350,6 @@ const streetFoodItems = [
     isTrending: false
   },
   {
-    restaurantId: null,
     name: 'Vada Pav',
     description: 'Spicy potato fritter sandwiched in soft bread with chutneys',
     price: '₹70',
@@ -371,7 +366,6 @@ const streetFoodItems = [
     isTrending: false
   },
   {
-    restaurantId: null,
     name: 'Masala Dosa',
     description: 'Crispy rice crepe filled with spiced potato mixture',
     price: '₹110',
@@ -388,7 +382,6 @@ const streetFoodItems = [
     isTrending: false
   },
   {
-    restaurantId: null,
     name: 'Chole Bhature',
     description: 'Spicy chickpea curry served with deep-fried bread',
     price: '₹130',
@@ -405,7 +398,6 @@ const streetFoodItems = [
     isTrending: false
   },
   {
-    restaurantId: null,
     name: 'Jalebi',
     description: 'Sweet fried dessert soaked in sugar syrup',
     price: '₹80',
