@@ -204,7 +204,7 @@ async function handleCountryCodes(req, res) {
       .map(country => {
         const countryCode = country.idd?.root || '';
         const suffix = country.idd?.suffixes?.[0] || '';
-        const fullCode = countryCode + suffix;
+        const fullCode = (countryCode + suffix).replace(/^\+/, ''); // Remove leading + if present
         
         return {
           name: country.name.common,
