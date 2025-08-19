@@ -16,6 +16,7 @@ import userRoutes from './routes/users.js';
 import restaurantRoutes from './routes/restaurants.js';
 import menuRoutes from './routes/menu.js';
 import orderRoutes from './routes/orders.js';
+import chatRoutes from './routes/chat.js';
 
 // Load environment variables
 dotenv.config();
@@ -88,6 +89,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
