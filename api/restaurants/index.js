@@ -31,6 +31,7 @@ export default async function handler(req, res) {
       dietary, 
       priceRange, 
       search,
+      favorites,
       limit = 20,
       page = 1
     } = req.query;
@@ -60,6 +61,10 @@ export default async function handler(req, res) {
         { cuisine: { $regex: search, $options: 'i' } },
         { popularDishes: { $regex: search, $options: 'i' } }
       ];
+    }
+    
+    if (favorites === 'true') {
+      filter.isFavorite = true;
     }
     
     // Calculate skip value for pagination
