@@ -394,7 +394,7 @@ async function handleAddressesRequest(req, res) {
     const db = client.db();
 
     // For now, we'll use a mock user ID since we don't have authentication set up
-    const userId = req.headers.authorization ? 'mock-user-id' : 'mock-user-id';
+    const userId = 'mock-user-id';
     const { action } = req.query;
 
     switch (action) {
@@ -467,11 +467,21 @@ async function handleAddressesRequest(req, res) {
         }
 
         const { id, ...updateData } = req.body;
+        
+        console.log('Update address request:', { id, updateData, userId }); // Debug log
 
         if (!id) {
           return res.status(400).json({
             success: false,
             message: 'Address ID is required'
+          });
+        }
+
+        // Validate ObjectId format
+        if (!ObjectId.isValid(id)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid address ID format'
           });
         }
 
@@ -481,6 +491,21 @@ async function handleAddressesRequest(req, res) {
             { userId },
             { $set: { isDefault: false } }
           );
+        }
+
+        // Check if address exists before updating
+        const existingAddress = await db.collection('addresses').findOne({
+          _id: new ObjectId(id),
+          userId
+        });
+        
+        console.log('Existing address found:', existingAddress ? 'Yes' : 'No'); // Debug log
+
+        if (!existingAddress) {
+          return res.status(404).json({
+            success: false,
+            message: 'Address not found'
+          });
         }
 
         const updatedAddress = await db.collection('addresses').findOneAndUpdate(
@@ -493,6 +518,8 @@ async function handleAddressesRequest(req, res) {
           },
           { returnDocument: 'after' }
         );
+
+        console.log('Update result:', updatedAddress); // Debug log
 
         if (!updatedAddress.value) {
           return res.status(404).json({
@@ -518,6 +545,14 @@ async function handleAddressesRequest(req, res) {
           return res.status(400).json({
             success: false,
             message: 'Address ID is required'
+          });
+        }
+
+        // Validate ObjectId format
+        if (!ObjectId.isValid(addressId)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid address ID format'
           });
         }
 
