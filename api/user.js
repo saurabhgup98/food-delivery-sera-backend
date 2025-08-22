@@ -1,5 +1,6 @@
 import connectDB from '../lib/mongodb.js';
 import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 import { verifyToken } from '../lib/jwt.js';
 import { MongoClient, ObjectId } from 'mongodb';
 
@@ -635,6 +636,20 @@ async function handleChangePassword(req, res, userId) {
     // Update password
     user.password = newPassword;
     await user.save();
+
+    // Create password change notification
+    try {
+      const passwordChangeNotification = new Notification({
+        userId: user._id,
+        title: 'Password Changed Successfully 🔒',
+        message: `Your password was changed successfully at ${new Date().toLocaleString()}. If you didn't make this change, please contact support immediately.`,
+        type: 'security',
+        action: 'none'
+      });
+      await passwordChangeNotification.save();
+    } catch (error) {
+      console.error('Error creating password change notification:', error);
+    }
 
     res.status(200).json({
       success: true,

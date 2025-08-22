@@ -1,5 +1,6 @@
 import connectDB from '../lib/mongodb.js';
 import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 import { generateToken, verifyToken } from '../lib/jwt.js';
 
 export default async function handler(req, res) {
@@ -79,6 +80,22 @@ async function handleRegister(req, res) {
     // Generate JWT token
     const token = generateToken(user._id);
     
+    // Create welcome notification (1 minute delay simulation)
+    setTimeout(async () => {
+      try {
+        const welcomeNotification = new Notification({
+          userId: user._id,
+          title: 'Welcome to SERA! 🎉',
+          message: `Hi ${user.name}! Welcome to SERA Food Delivery. Start exploring delicious food from the best restaurants in your area.`,
+          type: 'registration',
+          action: 'none'
+        });
+        await welcomeNotification.save();
+      } catch (error) {
+        console.error('Error creating welcome notification:', error);
+      }
+    }, 1000); // 1 second delay for demo
+    
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
@@ -151,6 +168,20 @@ async function handleLogin(req, res) {
     // Verify password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
+      // Create wrong password notification
+      try {
+        const wrongPasswordNotification = new Notification({
+          userId: user._id,
+          title: 'Login Attempt Failed 🔒',
+          message: `Failed login attempt detected at ${new Date().toLocaleString()}. If this wasn't you, please change your password immediately.`,
+          type: 'security',
+          action: 'none'
+        });
+        await wrongPasswordNotification.save();
+      } catch (error) {
+        console.error('Error creating wrong password notification:', error);
+      }
+      
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'

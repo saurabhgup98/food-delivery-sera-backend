@@ -87,3 +87,4 @@ function generateAIResponse(message: string, userContext: any): string {
 }
 
 export default router;
+

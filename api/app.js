@@ -1,4 +1,7 @@
 import connectDB from '../lib/mongodb.js';
+import Notification from '../models/Notification.js';
+import PromoCode from '../models/PromoCode.js';
+import User from '../models/User.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', 'https://food-delivery-sera.vercel.app');
@@ -26,6 +29,8 @@ export default async function handler(req, res) {
         return handleAppInfo(req, res);
       case 'notifications':
         return handleNotifications(req, res);
+      case 'promotions':
+        return handlePromotions(req, res);
       default:
         return res.status(400).json({ success: false, message: 'Invalid action' });
     }
@@ -181,27 +186,9 @@ async function getNotifications(req, res) {
       return res.status(400).json({ success: false, message: 'User ID is required' });
     }
 
-    // Mock notifications - in real app, fetch from database
-    const notifications = [
-      {
-        id: '1',
-        userId,
-        title: 'Order Confirmed',
-        message: 'Your order #12345 has been confirmed',
-        type: 'order',
-        read: false,
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: '2',
-        userId,
-        title: 'Delivery Update',
-        message: 'Your order is out for delivery',
-        type: 'delivery',
-        read: false,
-        createdAt: new Date().toISOString()
-      }
-    ];
+    const notifications = await Notification.find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(50);
 
     res.status(200).json({
       success: true,
@@ -217,19 +204,29 @@ async function getNotifications(req, res) {
 // Create notification
 async function createNotification(req, res) {
   try {
-    const { userId, title, message, type } = req.body;
+    const { userId, title, message, type, action, orderId, promoCode, expiresAt } = req.body;
 
-    if (!userId || !title || !message) {
-      return res.status(400).json({ success: false, message: 'User ID, title, and message are required' });
+    if (!userId || !title || !message || !type) {
+      return res.status(400).json({ success: false, message: 'User ID, title, message, and type are required' });
     }
 
-    // Here you would typically save to database
-    console.log('Creating notification:', { userId, title, message, type });
+    const notification = new Notification({
+      userId,
+      title,
+      message,
+      type,
+      action: action || 'none',
+      orderId,
+      promoCode,
+      expiresAt: expiresAt ? new Date(expiresAt) : null
+    });
+
+    await notification.save();
 
     res.status(200).json({
       success: true,
       message: 'Notification created successfully',
-      data: { notificationId: 'NOTIF-' + Date.now() }
+      data: { notificationId: notification._id }
     });
   } catch (error) {
     console.error('Create notification error:', error);
@@ -241,22 +238,130 @@ async function createNotification(req, res) {
 async function updateNotification(req, res) {
   try {
     const { notificationId } = req.query;
-    const { read } = req.body;
+    const { isRead } = req.body;
 
     if (!notificationId) {
       return res.status(400).json({ success: false, message: 'Notification ID is required' });
     }
 
-    // Here you would typically update in database
-    console.log('Updating notification:', { notificationId, read });
+    const notification = await Notification.findByIdAndUpdate(
+      notificationId,
+      { isRead: isRead !== undefined ? isRead : true },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({ success: false, message: 'Notification not found' });
+    }
 
     res.status(200).json({
       success: true,
       message: 'Notification updated successfully',
-      data: { updated: true }
+      data: { notification }
     });
   } catch (error) {
     console.error('Update notification error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
+}
+
+// Handle promotions
+async function handlePromotions(req, res) {
+  if (req.method === 'POST') {
+    return createPromoCode(req, res);
+  } else if (req.method === 'GET') {
+    return getPromoCodes(req, res);
+  } else {
+    return res.status(405).json({ success: false, message: 'Method not allowed' });
+  }
+}
+
+// Create promo code
+async function createPromoCode(req, res) {
+  try {
+    const { userId, type, discountPercentage = 20, minimumOrderAmount = 300 } = req.body;
+
+    if (!userId || !type) {
+      return res.status(400).json({ success: false, message: 'User ID and type are required' });
+    }
+
+    // Generate unique promo code
+    const code = generatePromoCode();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
+
+    const promoCode = new PromoCode({
+      code,
+      userId,
+      type,
+      discountPercentage,
+      minimumOrderAmount,
+      expiresAt
+    });
+
+    await promoCode.save();
+
+    // Create notification for the promo code
+    const notification = new Notification({
+      userId,
+      title: type === 'birthday' ? 'Happy Birthday! 🎂' : 'Special Offer! 🎁',
+      message: `Get ${discountPercentage}% off on orders above ₹${minimumOrderAmount}. Use code: ${code}`,
+      type: type === 'birthday' ? 'birthday' : 'promo',
+      action: 'use_code',
+      promoCode: code,
+      expiresAt
+    });
+
+    await notification.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Promo code created successfully',
+      data: { 
+        promoCode: code,
+        discountPercentage,
+        minimumOrderAmount,
+        expiresAt
+      }
+    });
+  } catch (error) {
+    console.error('Create promo code error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
+
+// Get promo codes
+async function getPromoCodes(req, res) {
+  try {
+    const { userId } = req.query;
+    
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'User ID is required' });
+    }
+
+    const promoCodes = await PromoCode.find({ 
+      userId, 
+      isUsed: false,
+      expiresAt: { $gt: new Date() }
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      message: 'Promo codes retrieved successfully',
+      data: { promoCodes }
+    });
+  } catch (error) {
+    console.error('Get promo codes error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
+
+// Generate unique promo code
+function generatePromoCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
 }
