@@ -1,6 +1,7 @@
 import connectDB from '../lib/mongodb.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
+import Activity from '../models/Activity.js';
 import { generateToken, verifyToken } from '../lib/jwt.js';
 
 export default async function handler(req, res) {
@@ -95,6 +96,27 @@ async function handleRegister(req, res) {
         console.error('Error creating welcome notification:', error);
       }
     }, 1000); // 1 second delay for demo
+
+    // Create admin activity for new customer registration
+    setTimeout(async () => {
+      try {
+        const adminActivity = new Activity({
+          type: 'customer_registered',
+          title: 'New Customer Registered',
+          description: `New customer "${user.name}" (${user.email}) has registered on the platform.`,
+          userId: user._id,
+          targetRole: 'admin',
+          metadata: {
+            customerName: user.name,
+            customerEmail: user.email,
+            registrationTime: new Date()
+          }
+        });
+        await adminActivity.save();
+      } catch (error) {
+        console.error('Error creating admin activity:', error);
+      }
+    }, 2000); // 2 second delay to ensure user is saved first
     
     res.status(201).json({
       success: true,
