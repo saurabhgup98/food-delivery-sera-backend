@@ -11,7 +11,6 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { notFound } from './middleware/notFound.js';
 
 // Import routes
-import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import restaurantRoutes from './routes/restaurants.js';
 import menuRoutes from './routes/menu.js';
@@ -84,7 +83,6 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
-app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/menu', menuRoutes);

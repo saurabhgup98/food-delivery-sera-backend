@@ -1,15 +1,11 @@
 import { Request } from 'express';
 
-// User Types
+// User Types (simplified for food delivery app)
 export interface IUser {
   _id: string;
-  name: string;
-  email: string;
-  password: string;
+  authUserId: string; // Reference to simple-auth user ID
   phone?: string;
   avatar?: string;
-  role: 'user' | 'admin' | 'restaurant_owner';
-  isVerified: boolean;
   addresses: IAddress[];
   preferences: IUserPreferences;
   createdAt: Date;
@@ -204,21 +200,12 @@ export interface ICart {
   updatedAt: Date;
 }
 
-// Auth Types
+// Auth Types (simplified)
 export interface IAuthRequest extends Request {
-  user?: IUser;
-}
-
-export interface ILoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface IRegisterRequest {
-  name: string;
-  email: string;
-  password: string;
-  phone?: string;
+  user?: {
+    _id: string;
+    id: string;
+  };
 }
 
 // API Response Types
@@ -244,11 +231,9 @@ export interface IAppError extends Error {
   errors?: Record<string, any>;
 }
 
-// JWT Payload
+// JWT Payload (from simple-auth service)
 export interface IJWTPayload {
   userId: string;
-  email: string;
-  role: string;
   iat: number;
   exp: number;
 }

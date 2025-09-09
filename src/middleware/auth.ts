@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { IAuthRequest, IUser, IJWTPayload, IAppError } from '../types/index.js';
-import User from '../models/User.js';
+import { IAuthRequest, IAppError } from '../types/index.js';
+
+// Simple Auth Service JWT Secret (should match the one in simple-auth service)
+const SIMPLE_AUTH_JWT_SECRET = process.env['SIMPLE_AUTH_JWT_SECRET'] || process.env['JWT_SECRET'] || 'fallback-secret';
 
 export const protect = async (
   req: IAuthRequest,
@@ -26,29 +28,15 @@ export const protect = async (
   }
 
   try {
-    // Verify token
-    const decoded = jwt.verify(
-      token,
-      process.env['JWT_SECRET'] || 'fallback-secret'
-    ) as IJWTPayload;
+    // Verify token using simple-auth JWT secret
+    const decoded = jwt.verify(token, SIMPLE_AUTH_JWT_SECRET) as any;
 
-    // Get user from token
-    const user = await User.findById(decoded.userId).select('-password');
+    // Set user info from token (simple-auth provides userId)
+    req.user = {
+      _id: decoded.userId,
+      id: decoded.userId,
+    } as any;
 
-    if (!user) {
-      const error: IAppError = new Error('User not found') as IAppError;
-      error.statusCode = 401;
-      return next(error);
-    }
-
-    // Check if user is verified
-    if (!user.isVerified) {
-      const error: IAppError = new Error('Please verify your email first') as IAppError;
-      error.statusCode = 401;
-      return next(error);
-    }
-
-    req.user = user;
     next();
   } catch (error) {
     const jwtError: IAppError = new Error('Not authorized to access this route') as IAppError;

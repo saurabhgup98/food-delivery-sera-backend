@@ -4,7 +4,7 @@ import { IUser, IAddress, IUserPreferences } from '../types/index.js';
 
 export interface IUserDocument extends Omit<IUser, '_id'>, Document {
   _id: string;
-  matchPassword(enteredPassword: string): Promise<boolean>;
+  authUserId: string;
 }
 
 const addressSchema = new Schema<IAddress>({
@@ -81,28 +81,12 @@ const userPreferencesSchema = new Schema<IUserPreferences>({
 });
 
 const userSchema = new Schema<IUserDocument>({
-  name: {
+  // Reference to simple-auth user ID
+  authUserId: {
     type: String,
-    required: [true, 'Name is required'],
-    trim: true,
-    maxlength: [50, 'Name cannot be more than 50 characters'],
-  },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
+    required: [true, 'Auth user ID is required'],
     unique: true,
-    lowercase: true,
-    trim: true,
-    match: [
-      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
-      'Please enter a valid email',
-    ],
-  },
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters'],
-    select: false,
+    index: true,
   },
   phone: {
     type: String,
@@ -116,15 +100,6 @@ const userSchema = new Schema<IUserDocument>({
     type: String,
     default: '',
   },
-  role: {
-    type: String,
-    enum: ['user', 'admin', 'restaurant_owner'],
-    default: 'user',
-  },
-  isVerified: {
-    type: Boolean,
-    default: false,
-  },
   addresses: [addressSchema],
   preferences: {
     type: userPreferencesSchema,
@@ -132,47 +107,15 @@ const userSchema = new Schema<IUserDocument>({
   },
 }, {
   timestamps: true,
-  toJSON: {
-    transform: function (doc, ret) {
-      if ('password' in ret) {
-        delete (ret as any).password;
-      }
-      return ret;
-    },
-  },
 });
 
 // Index for better query performance
-userSchema.index({ email: 1 });
+userSchema.index({ authUserId: 1 });
 userSchema.index({ phone: 1 });
 
-// Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-
-  try {
-    const salt = await bcrypt.genSalt(parseInt(process.env['BCRYPT_ROUNDS'] || '12'));
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error as Error);
-  }
-});
-
-// Compare password method
-userSchema.methods['matchPassword'] = async function (enteredPassword: string): Promise<boolean> {
-  try {
-    return await bcrypt.compare(enteredPassword, this['password']);
-  } catch (error) {
-    throw new Error('Password comparison failed');
-  }
-};
-
-// Virtual for full name
+// Virtual for full name (will be fetched from simple-auth service)
 userSchema.virtual('fullName').get(function () {
-  return this.name;
+  return 'User'; // Placeholder, actual name will come from simple-auth
 });
 
 // Ensure only one default address per user
