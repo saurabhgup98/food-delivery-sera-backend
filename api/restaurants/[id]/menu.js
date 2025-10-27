@@ -1,5 +1,4 @@
 import connectDB from '../../../lib/mongodb.js';
-import MenuItem from '../../../models/MenuItem.js';
 import Restaurant from '../../../models/Restaurant.js';
 
 export default async function handler(req, res) {
@@ -47,7 +46,7 @@ export default async function handler(req, res) {
     const restaurant = await Restaurant.findOne({ 
       _id: id, 
       isActive: true 
-    });
+    }).lean();
     
     if (!restaurant) {
       return res.status(404).json({
@@ -56,61 +55,53 @@ export default async function handler(req, res) {
       });
     }
     
-    // Build filter object
-    const filter = { 
-      restaurantId: id
-    };
+    // Get dishes from embedded array
+    let dishes = restaurant.dishes || [];
     
+    // Apply filters
     if (category && category !== 'all') {
-      filter.category = category;
+      dishes = dishes.filter(dish => dish.category === category);
     }
     
     if (dietary && dietary !== 'all') {
-      filter.dietary = dietary;
+      dishes = dishes.filter(dish => dish.dietary === dietary);
     }
     
     if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
+      const searchLower = search.toLowerCase();
+      dishes = dishes.filter(dish => 
+        dish.name.toLowerCase().includes(searchLower) ||
+        dish.description.toLowerCase().includes(searchLower)
+      );
     }
     
-    // Filter by type
-    if (type === 'popular') {
-      filter.isPopular = true;
-    } else if (type === 'chef-special') {
-      filter.isChefSpecial = true;
-    } else if (type === 'quick-order') {
-      filter.isQuickOrder = true;
-    } else if (type === 'trending') {
-      filter.isTrending = true;
-    }
+    // Filter by type (disabled for now as requested)
+    // if (type === 'popular') {
+    //   dishes = dishes.filter(dish => dish.isPopular);
+    // } else if (type === 'chef-special') {
+    //   dishes = dishes.filter(dish => dish.isChefSpecial);
+    // } else if (type === 'quick-order') {
+    //   dishes = dishes.filter(dish => dish.isQuickOrder);
+    // } else if (type === 'trending') {
+    //   dishes = dishes.filter(dish => dish.isTrending);
+    // }
     
-    // Calculate skip value for pagination
+    // Sort dishes
+    dishes.sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name));
+    
+    // Apply pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
-    // Get menu items with pagination
-    const menuItems = await MenuItem.find(filter)
-      .sort({ rating: -1, name: 1 })
-      .skip(skip)
-      .limit(parseInt(limit))
-      .lean();
+    const paginatedDishes = dishes.slice(skip, skip + parseInt(limit));
     
     // Get total count for pagination
-    const totalCount = await MenuItem.countDocuments(filter);
+    const totalCount = dishes.length;
     
     // Calculate total pages
     const totalPages = Math.ceil(totalCount / parseInt(limit));
     
     // Get category counts
-    const categoryCounts = await MenuItem.aggregate([
-      { $match: { restaurantId: id, isAvailable: true } },
-      { $group: { _id: '$category', count: { $sum: 1 } } }
-    ]);
-    
-    const categoryStats = categoryCounts.reduce((acc, item) => {
-      acc[item._id] = item.count;
+    const categoryCounts = (restaurant.dishes || []).reduce((acc, dish) => {
+      acc[dish.category] = (acc[dish.category] || 0) + 1;
       return acc;
     }, {});
     
@@ -118,8 +109,8 @@ export default async function handler(req, res) {
       success: true,
       message: 'Menu items retrieved successfully',
       data: {
-        menuItems,
-        categoryStats,
+        menuItems: paginatedDishes,
+        categoryStats: categoryCounts,
         pagination: {
           currentPage: parseInt(page),
           totalPages,

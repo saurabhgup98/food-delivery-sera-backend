@@ -106,7 +106,96 @@ const restaurantSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  }
+  },
+  // Embedded dishes array
+  dishes: [{
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: () => new mongoose.Types.ObjectId()
+    },
+    name: {
+      type: String,
+      required: [true, 'Dish name is required'],
+      trim: true,
+      maxlength: [100, 'Dish name cannot be more than 100 characters']
+    },
+    description: {
+      type: String,
+      required: [true, 'Dish description is required'],
+      maxlength: [500, 'Description cannot be more than 500 characters']
+    },
+    price: {
+      type: String,
+      required: [true, 'Dish price is required']
+    },
+    image: {
+      type: String,
+      required: [true, 'Dish image is required']
+    },
+    category: {
+      type: String,
+      enum: ['starters', 'mains', 'breads', 'desserts', 'beverages'],
+      required: [true, 'Dish category is required']
+    },
+    dietary: {
+      type: String,
+      enum: ['veg', 'non-veg', 'jain', 'vegan'],
+      required: [true, 'Dietary type is required']
+    },
+    spiceLevel: {
+      type: String,
+      enum: ['mild', 'medium', 'hot', 'extra-hot'],
+      default: 'medium'
+    },
+    prepTime: {
+      type: String,
+      required: true,
+      default: '20 min'
+    },
+    calories: {
+      type: String
+    },
+    rating: {
+      type: Number,
+      min: [0, 'Rating cannot be less than 0'],
+      max: [5, 'Rating cannot be more than 5'],
+      default: 4.0
+    },
+    isPopular: {
+      type: Boolean,
+      default: false
+    },
+    isChefSpecial: {
+      type: Boolean,
+      default: false
+    },
+    isQuickOrder: {
+      type: Boolean,
+      default: false
+    },
+    isTrending: {
+      type: Boolean,
+      default: false
+    },
+    isAvailable: {
+      type: Boolean,
+      default: true
+    },
+    customizationOptions: {
+      sizes: [{
+        name: String,
+        price: String
+      }],
+      spiceLevels: [{
+        name: String,
+        price: String
+      }],
+      addOns: [{
+        name: String,
+        price: String
+      }]
+    }
+  }]
 }, {
   timestamps: true
 });
