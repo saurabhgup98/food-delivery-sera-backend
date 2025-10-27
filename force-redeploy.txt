@@ -1,2 +1,0 @@
-Force redeploy - Updated at: 2024-12-19 15:30:00
-Triggering new deployment for restaurant API endpoints
