@@ -1,36 +1,49 @@
 import { Request } from 'express';
 
-// User Types (simplified for food delivery app)
+// User Types (comprehensive for food delivery app)
 export interface IUser {
   _id: string;
+  email: string; // Primary bridge key from simple-auth
   authUserId: string; // Reference to simple-auth user ID
-  phone?: string;
-  avatar?: string;
+  personalDetails: IPersonalDetails;
   addresses: IAddress[];
-  preferences: IUserPreferences;
+  foodPreferences: IFoodPreferences;
+  avatar?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
+export interface IPersonalDetails {
+  fullName: string;
+  phone: string;
+  countryCode: string;
+  dateOfBirth?: Date;
+  gender?: 'male' | 'female' | 'other' | 'prefer-not-to-say';
+}
+
 export interface IAddress {
   _id: string;
-  label: string;
+  addressType: 'Home' | 'Work' | 'Other';
   fullName: string;
   phone: string;
   address: string;
-  city: string;
+  country: string;
   state: string;
+  city: string;
   pincode: string;
+  deliveryInstructions?: string;
   isDefault: boolean;
-  specialInstructions?: string;
 }
 
-export interface IUserPreferences {
-  dietaryRestrictions: string[];
-  allergies: string[];
-  spiceLevel: 'mild' | 'medium' | 'hot';
-  caloriePreference: 'low' | 'medium' | 'high';
-  preferredCuisines: string[];
+export interface IFoodPreferences {
+  dietaryPreferences: ('vegetarian' | 'vegan' | 'jain' | 'halal' | 'kosher' | 'gluten-free' | 'dairy-free' | 'nut-free')[];
+  allergies: {
+    fixed: ('nuts' | 'dairy' | 'gluten' | 'seafood' | 'eggs')[];
+    custom: string[];
+  };
+  spiceLevel: 'mild' | 'medium' | 'hot' | 'extra-hot';
+  caloriePreference: 'low' | 'moderate' | 'high';
+  preferredCuisines: ('indian' | 'chinese' | 'italian' | 'mexican' | 'thai' | 'japanese' | 'mediterranean' | 'american')[];
 }
 
 // Restaurant Types
