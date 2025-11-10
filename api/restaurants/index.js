@@ -81,6 +81,9 @@ export default async function handler(req, res) {
       // Return mock data for local requests
       let mockRestaurants = getMockRestaurants();
       
+      // Debug: Log restaurant names
+      console.log('Mock restaurants:', mockRestaurants.map(r => ({ id: r._id, name: r.name, status: r.status })));
+      
       // Apply filters to mock data
       mockRestaurants = filterMockRestaurants(mockRestaurants, { status, cuisine, dietary, search });
       
