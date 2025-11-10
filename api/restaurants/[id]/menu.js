@@ -1,39 +1,38 @@
-import connectDB from '../../../lib/mongodb.js';
 import Restaurant from '../../../models/Restaurant.js';
+import { getMockMenuItems } from '../../../lib/mockData.js';
+import { 
+  isLocalRequest,
+  connectToDB,
+  setCORSHeaders, 
+  handlePreflight, 
+  validateMethod, 
+  handleError 
+} from '../../../lib/apiHelpers.js';
+import {
+  filterMenuItems,
+  sortMenuItems,
+  calculatePagination,
+  applyPagination,
+  calculateCategoryStats
+} from '../../../lib/restaurantHelpers.js';
 
 export default async function handler(req, res) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // Set CORS headers
+  setCORSHeaders(res);
   
   // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
+  if (handlePreflight(req, res)) {
     return;
   }
   
   // Only allow GET requests
-  if (req.method !== 'GET') {
-    return res.status(405).json({
-      success: false,
-      message: 'Method not allowed'
-    });
+  if (!validateMethod(req, res, 'GET')) {
+    return;
   }
   
   try {
-    // Connect to database
-    await connectDB();
-    
     const { id } = req.query;
-    const { 
-      category, 
-      dietary, 
-      search,
-      type = 'all', // all, popular, chef-special, quick-order, trending
-      limit = 50,
-      page = 1
-    } = req.query;
+    const { category, dietary, search, type = 'all', limit = 50, page = 1 } = req.query;
     
     if (!id) {
       return res.status(400).json({
@@ -41,6 +40,41 @@ export default async function handler(req, res) {
         message: 'Restaurant ID is required'
       });
     }
+    
+    // Check if request is from localhost/local network
+    const isLocal = isLocalRequest(req);
+    
+    if (isLocal) {
+      // Return mock data for local requests
+      let mockDishes = getMockMenuItems(id);
+      
+      // Apply filters to mock data
+      mockDishes = filterMenuItems(mockDishes, { category, dietary, search });
+      
+      // Sort dishes
+      mockDishes = sortMenuItems(mockDishes);
+      
+      // Apply pagination
+      const paginatedDishes = applyPagination(mockDishes, page, limit);
+      const pagination = calculatePagination(page, limit, mockDishes.length);
+      
+      // Get category counts from all mock dishes
+      const allMockDishes = getMockMenuItems(id);
+      const categoryStats = calculateCategoryStats(allMockDishes);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Menu items retrieved successfully (mock data)',
+        data: {
+          menu: paginatedDishes,
+          categoryStats,
+          pagination
+        }
+      });
+    }
+    
+    // For production, connect to DB and fetch
+    await connectToDB();
     
     // Verify restaurant exists and is active
     const restaurant = await Restaurant.findOne({ 
@@ -59,81 +93,29 @@ export default async function handler(req, res) {
     let dishes = restaurant.dishes || [];
     
     // Apply filters
-    if (category && category !== 'all') {
-      dishes = dishes.filter(dish => dish.category === category);
-    }
-    
-    if (dietary && dietary !== 'all') {
-      dishes = dishes.filter(dish => dish.dietary === dietary);
-    }
-    
-    if (search) {
-      const searchLower = search.toLowerCase();
-      dishes = dishes.filter(dish => 
-        dish.name.toLowerCase().includes(searchLower) ||
-        dish.description.toLowerCase().includes(searchLower)
-      );
-    }
-    
-    // Filter by type (disabled for now as requested)
-    // if (type === 'popular') {
-    //   dishes = dishes.filter(dish => dish.isPopular);
-    // } else if (type === 'chef-special') {
-    //   dishes = dishes.filter(dish => dish.isChefSpecial);
-    // } else if (type === 'quick-order') {
-    //   dishes = dishes.filter(dish => dish.isQuickOrder);
-    // } else if (type === 'trending') {
-    //   dishes = dishes.filter(dish => dish.isTrending);
-    // }
+    dishes = filterMenuItems(dishes, { category, dietary, search });
     
     // Sort dishes
-    dishes.sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name));
+    dishes = sortMenuItems(dishes);
     
     // Apply pagination
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const paginatedDishes = dishes.slice(skip, skip + parseInt(limit));
-    
-    // Get total count for pagination
-    const totalCount = dishes.length;
-    
-    // Calculate total pages
-    const totalPages = Math.ceil(totalCount / parseInt(limit));
+    const paginatedDishes = applyPagination(dishes, page, limit);
+    const pagination = calculatePagination(page, limit, dishes.length);
     
     // Get category counts
-    const categoryCounts = (restaurant.dishes || []).reduce((acc, dish) => {
-      acc[dish.category] = (acc[dish.category] || 0) + 1;
-      return acc;
-    }, {});
+    const categoryStats = calculateCategoryStats(restaurant.dishes || []);
     
     res.status(200).json({
       success: true,
       message: 'Menu items retrieved successfully',
       data: {
-        menuItems: paginatedDishes,
-        categoryStats: categoryCounts,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages,
-          totalCount,
-          hasNextPage: parseInt(page) < totalPages,
-          hasPrevPage: parseInt(page) > 1
-        }
+        menu: paginatedDishes,
+        categoryStats,
+        pagination
       }
     });
     
   } catch (error) {
-    console.error('Get menu error:', error);
-    
-    if (error.name === 'CastError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid restaurant ID'
-      });
-    }
-    
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+    handleError(error, res, 'Internal server error');
   }
 }

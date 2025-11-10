@@ -1,108 +1,134 @@
-import connectDB from '../../lib/mongodb.js';
 import Restaurant from '../../models/Restaurant.js';
+import { getMockRestaurants, getMockRestaurant } from '../../lib/mockData.js';
+import { 
+  isLocalRequest,
+  connectToDB,
+  setCORSHeaders, 
+  handlePreflight, 
+  validateMethod, 
+  handleError 
+} from '../../lib/apiHelpers.js';
+import {
+  buildRestaurantFilter,
+  buildRestaurantSort,
+  filterMockRestaurants,
+  calculatePagination,
+  applyPagination
+} from '../../lib/restaurantHelpers.js';
 
 export default async function handler(req, res) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', 'https://food-delivery-sera.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // Set CORS headers
+  setCORSHeaders(res);
   
   // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
+  if (handlePreflight(req, res)) {
     return;
   }
   
   // Only allow GET requests
-  if (req.method !== 'GET') {
-    return res.status(405).json({
-      success: false,
-      message: 'Method not allowed'
-    });
+  if (!validateMethod(req, res, 'GET')) {
+    return;
   }
   
   try {
-    // Connect to database
-    await connectDB();
+    const { id, status, cuisine, dietary, priceRange, search, favorites, limit = 20, page = 1, sortBy = 'rating' } = req.query;
     
-    const { 
-      status, 
-      cuisine, 
-      dietary, 
-      priceRange, 
-      search,
-      favorites,
-      limit = 20,
-      page = 1
-    } = req.query;
+    // Check if request is from localhost/local network
+    const isLocal = isLocalRequest(req);
     
-    // Build filter object
-    const filter = { isActive: true };
-    
-    if (status && status !== 'all') {
-      filter.status = status;
+    // Handle single restaurant request (if id is provided)
+    if (id) {
+      if (isLocal) {
+        // Return mock data for local requests
+        const mockRestaurant = getMockRestaurant(id);
+        
+        return res.status(200).json({
+          success: true,
+          message: 'Restaurant retrieved successfully (mock data)',
+          data: {
+            restaurant: mockRestaurant
+          }
+        });
+      }
+      
+      // For production, connect to DB and fetch
+      await connectToDB();
+      
+      // Find restaurant by ID from database
+      const restaurant = await Restaurant.findOne({ 
+        _id: id, 
+        isActive: true 
+      }).lean();
+      
+      if (!restaurant) {
+        return res.status(404).json({
+          success: false,
+          message: 'Restaurant not found'
+        });
+      }
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Restaurant retrieved successfully',
+        data: {
+          restaurant
+        }
+      });
     }
     
-    if (cuisine && cuisine !== 'all') {
-      filter.cuisine = { $in: [cuisine] };
+    // Handle list restaurants request (no id provided)
+    if (isLocal) {
+      // Return mock data for local requests
+      let mockRestaurants = getMockRestaurants();
+      
+      // Apply filters to mock data
+      mockRestaurants = filterMockRestaurants(mockRestaurants, { status, cuisine, dietary, search });
+      
+      // Apply pagination
+      const paginatedRestaurants = applyPagination(mockRestaurants, page, limit);
+      const pagination = calculatePagination(page, limit, mockRestaurants.length);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Restaurants retrieved successfully (mock data)',
+        data: {
+          restaurants: paginatedRestaurants,
+          pagination
+        }
+      });
     }
     
-    if (dietary && dietary !== 'all') {
-      filter.dietary = dietary;
-    }
+    // For production, connect to DB and fetch
+    await connectToDB();
     
-    if (priceRange && priceRange !== 'all') {
-      filter.priceRange = priceRange;
-    }
+    // Build filter and sort objects
+    const filter = buildRestaurantFilter({ status, cuisine, dietary, priceRange, search, favorites });
+    const sortObj = buildRestaurantSort(sortBy);
     
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { cuisine: { $regex: search, $options: 'i' } },
-        { popularDishes: { $regex: search, $options: 'i' } }
-      ];
-    }
-    
-    if (favorites === 'true') {
-      filter.isFavorite = true;
-    }
-    
-    // Calculate skip value for pagination
+    // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
-    // Get restaurants with pagination
+    // Get restaurants with pagination from database
     const restaurants = await Restaurant.find(filter)
-      .sort({ rating: -1, reviewCount: -1 })
+      .sort(sortObj)
       .skip(skip)
       .limit(parseInt(limit))
       .lean();
     
     // Get total count for pagination
     const totalCount = await Restaurant.countDocuments(filter);
-    
-    // Calculate total pages
-    const totalPages = Math.ceil(totalCount / parseInt(limit));
+    const pagination = calculatePagination(page, limit, totalCount);
     
     res.status(200).json({
       success: true,
       message: 'Restaurants retrieved successfully',
       data: {
         restaurants,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages,
-          totalCount,
-          hasNextPage: parseInt(page) < totalPages,
-          hasPrevPage: parseInt(page) > 1
-        }
+        pagination
       }
     });
     
   } catch (error) {
-    console.error('Get restaurants error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+    handleError(error, res, 'Internal server error');
   }
 }
