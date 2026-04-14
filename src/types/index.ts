@@ -218,6 +218,8 @@ export interface IAuthRequest extends Request {
   user?: {
     _id: string;
     id: string;
+    email: string;
+    role?: string;
   };
 }
 

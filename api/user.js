@@ -1,6 +1,7 @@
 import connectDB from '../lib/mongodb.js';
 import { verifyToken } from '../lib/jwt.js';
 import { MongoClient, ObjectId } from 'mongodb';
+import User from '../models/User.js';
 import { 
   handleProfile, 
   handleUpdateProfile, 
@@ -15,7 +16,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/food-d
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-user-email, x-auth-user-id');
   
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -32,32 +33,26 @@ export default async function handler(req, res) {
   try {
     await connectDB();
 
-    // Authentication check for all other user operations
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ success: false, message: 'Authorization token required' });
-    }
-
-    const token = authHeader.substring(7);
-    const decoded = verifyToken(token);
-    
-    if (!decoded) {
-      return res.status(401).json({ success: false, message: 'Invalid token' });
+    // Authentication check for all other user operations.
+    // Supports either backend JWT or centralized-auth identity headers.
+    const resolvedUserId = await resolveUserId(req);
+    if (!resolvedUserId) {
+      return res.status(401).json({ success: false, message: 'Authorization token or user identity headers required' });
     }
 
     switch (action) {
       case 'profile':
-        return handleProfile(req, res, decoded.userId);
+        return handleProfile(req, res, resolvedUserId);
       case 'update-profile':
-        return handleUpdateProfile(req, res, decoded.userId);
+        return handleUpdateProfile(req, res, resolvedUserId);
       case 'complete-profile':
-        return handleCompleteProfile(req, res, decoded.userId);
+        return handleCompleteProfile(req, res, resolvedUserId);
       case 'settings':
-        return handleSettings(req, res, decoded.userId);
+        return handleSettings(req, res, resolvedUserId);
       case 'update-settings':
-        return handleUpdateSettings(req, res, decoded.userId);
+        return handleUpdateSettings(req, res, resolvedUserId);
       case 'change-password':
-        return handleChangePassword(req, res, decoded.userId);
+        return handleChangePassword(req, res, resolvedUserId);
       default:
         return res.status(400).json({ success: false, message: 'Invalid action' });
     }
@@ -66,6 +61,45 @@ export default async function handler(req, res) {
     console.error('User API error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
+}
+
+async function resolveUserId(req) {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const token = authHeader.substring(7);
+      const decoded = verifyToken(token);
+      if (decoded?.userId) {
+        return decoded.userId;
+      }
+    } catch {
+      // Fall through to centralized-auth headers.
+    }
+  }
+
+  const headerEmail = req.headers['x-user-email'];
+  const headerAuthUserId = req.headers['x-auth-user-id'];
+
+  if (typeof headerEmail !== 'string' || typeof headerAuthUserId !== 'string') {
+    return null;
+  }
+
+  const normalizedEmail = headerEmail.toLowerCase().trim();
+  let user = await User.findOne({ email: normalizedEmail });
+
+  if (!user) {
+    // Local customer profile bootstrap for centralized-auth users.
+    user = await User.create({
+      name: normalizedEmail.split('@')[0] || 'Customer',
+      email: normalizedEmail,
+      // Unused for centralized-auth flow; keeps schema-compatible local profile record.
+      password: `central-auth-${headerAuthUserId}`,
+      role: 'user',
+      isActive: true,
+    });
+  }
+
+  return user._id.toString();
 }
 
 
